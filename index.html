@@ -1,0 +1,343 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Segmentation Analysis</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Plotly.js (Updated to a specific, newer version to avoid warning) -->
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple styling for the preformatted text */
+        pre {
+            background-color: #1F2937; /* gray-900 */
+            color: #F9FAFB; /* gray-50 */
+            padding: 1.5rem; /* p-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            overflow-x: auto; /* Allow horizontal scrolling */
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .success {
+            color: #34D399; /* emerald-400 */
+        }
+        .error {
+            color: #F87171; /* red-400 */
+        }
+        .header {
+            color: #FCD34D; /* amber-300 */
+        }
+        /* Simple loader for API call */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 md:p-8">
+
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-6 md:p-10">
+        
+        <!-- Header Section -->
+        <div class="border-b border-gray-200 pb-5 mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Customer Segmentation Analysis</h1>
+            <p class="mt-2 text-lg text-gray-500">Python Script & Sample Output</p>
+        </div>
+
+        <!-- Download Script Section -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">View Python Script</h2>
+            <p class="text-gray-600 mb-4">
+                This is the Python script used for the analysis. You can download it and run it on your local machine if you have Python and the required libraries (pandas, scikit-learn, etc.) installed.
+            </p>
+            <a href="segmentation.py" 
+               download="segmentation.py"
+               class="inline-block bg-blue-600 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out">
+                Download segmentation.py
+            </a>
+        </div>
+
+        <!-- Show Output Button Section -->
+        <div id="button-container" class="mb-8 text-center">
+            <button id="show-button"
+               class="inline-block bg-green-600 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Show Segmentation Analysis
+            </button>
+        </div>
+
+        <!-- Hidden Output Section -->
+        <div id="output-section" style="display: none;">
+            
+            <!-- Visual Representation Section -->
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Visual Representation (Sample PCA Plot)</h2>
+                <p class="text-gray-600 mb-4">
+                    This is a sample Plotly chart representing the customer clusters based on PCA components. The data is randomly generated in your browser to simulate the script's output.
+                </p>
+                <!-- Plotly chart will be rendered here -->
+                <div id="pca-plot" class="w-full h-96 md:h-[500px] border border-gray-200 rounded-lg shadow-inner bg-gray-50"></div>
+            </div>
+
+
+            <!-- Sample Output Section (now with top margin) -->
+            <div class="mt-12">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Sample Script Output (Terminal)</h2>
+                <p class="text-gray-600 mb-4">
+                    Below is a sample of the output you would see in your terminal when the script runs successfully.
+                </p>
+
+                <!-- Preformatted text block for code output -->
+                <pre>
+<span class="success">✅ Dataset Loaded Successfully!</span>
+   Shape: (2240, 29)
+   Columns: 29
+<span class="success">✅ Data preprocessed: 2240 rows, 19 numeric features</span>
+<span class="success">✅ Data standardized successfully</span>
+<span class="success">✅ Elbow analysis completed</span>
+<span class="success">✅ Clustering completed with K=4</span>
+   Cluster distribution: {0: 647, 1: 531, 2: 450, 3: 612}
+
+<span class="header">============================================================
+CLUSTER SUMMARY STATISTICS
+============================================================</span>
+         Income  Kidhome  Teenhome  Recency  MntWines  ...
+Cluster                                                ...
+0      35421.02     0.88      0.47    48.10     30.84  ...
+1      70903.88     0.08      0.24    49.61    520.28  ...
+2      60533.19     0.22      0.80    50.31    412.16  ...
+3      45749.03     0.54      0.39    49.17    185.08  ...
+
+<span class="success">✅ Clustered data saved to: Segmented_Customers_with_Clusters.csv</span>
+
+<span class="success">✅ All processes completed successfully!</span>
+</pre>
+            </div>
+
+            <!-- LLM Analysis UI (added) -->
+            <div class="mt-8">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">LLM Cluster Analysis</h2>
+                <p class="text-gray-600 mb-4">
+                    Click a button to send the cluster summary to the LLM (Gemini) for persona & strategy suggestions.
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <button id="analyze-cluster-0" class="bg-indigo-600 text-white py-2 px-3 rounded">Analyze Cluster 0</button>
+                    <button id="analyze-cluster-1" class="bg-indigo-600 text-white py-2 px-3 rounded">Analyze Cluster 1</button>
+                    <button id="analyze-cluster-2" class="bg-indigo-600 text-white py-2 px-3 rounded">Analyze Cluster 2</button>
+                    <button id="analyze-cluster-3" class="bg-indigo-600 text-white py-2 px-3 rounded">Analyze Cluster 3</button>
+                </div>
+
+                <div id="api-loader" class="loader" style="display:none;"></div>
+                <div id="api-result" class="mt-4 text-gray-700"></div>
+            </div>
+
+        </div> <!-- End of hidden-output-section -->
+
+    </div> <!-- End of bg-white card -->
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        // --- IMPORTANT ---
+        // REPLACE THIS with your own Google AI Studio API Key
+        // const apiKey = "YOUR_API_KEY_HERE"; 
+        // Per instructions, leave as empty string for canvas environment
+        const apiKey = ""; 
+
+        // Helper function for API call with exponential backoff
+        async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    // Don't retry on client errors (4xx), but do on server errors (5xx)
+                    if (response.status >= 500) {
+                        throw new Error(`Server error! status: ${response.status}`);
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(`API Error: ${errorData.error?.message || response.status}`);
+                    }
+                }
+                return response.json();
+            } catch (error) {
+                if (retries > 0) {
+                    // Do not log retries to console
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithBackoff(url, options, retries - 1, delay * 2);
+                } else {
+                    throw error; // All retries failed
+                }
+            }
+        }
+
+        // Helper function to format the LLM's markdown response to basic HTML
+        function formatResponseToHTML(text) {
+            let html = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/\* (.*?)(?=\n\*|\n$)/g, '<li>$1</li>'); // Bullets
+            
+            // Wrap bullet lists in <ul>
+            if (html.includes('<li>')) {
+                html = html.replace(/<li>/, '<ul><li>');
+                html = html.replace(/<\/li>(?!\s*<li>)/, '</li></ul>');
+            }
+            
+            // Wrap paragraphs
+            html = html.split('\n\n').map(paragraph => {
+                if (paragraph.startsWith('<ul>') || paragraph.startsWith('<p>')) {
+                    return paragraph;
+                }
+                // Don't wrap empty lines
+                if (paragraph.trim() === '') {
+                    return '';
+                }
+                // Handle paragraphs that might contain a list
+                if (paragraph.includes('<ul>')) {
+                    const parts = paragraph.split('<ul>');
+                    let p_part = parts[0].trim() ? `<p>${parts[0]}</p>` : '';
+                    let ul_part = '<ul>' + parts[1];
+                    return p_part + ul_part;
+                }
+                return `<p>${paragraph}</p>`;
+            }).join('');
+            
+            return html;
+        }
+
+        // Main function to call Gemini API
+        async function callGeminiAPI(prompt, resultContainer, loader) {
+            if (!apiKey) {
+                resultContainer.innerHTML = `<span class="error"><strong>Error:</strong> API key is missing. Please add your Gemini API key at the top of the &lt;script&gt; tag in this file.</span>`;
+                return;
+            }
+
+            if (loader) loader.style.display = 'block';
+            resultContainer.innerHTML = '';
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: {
+                    parts: [{ text: "You are an expert marketing analyst. Your goal is to create a customer persona and scannable, actionable marketing strategies based on cluster data. Use markdown for formatting." }]
+                },
+            };
+
+            try {
+                const result = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const candidate = result.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const text = candidate.content.parts[0].text;
+                    resultContainer.innerHTML = formatResponseToHTML(text);
+                } else {
+                    throw new Error("Invalid response structure from API.");
+                }
+            } catch (error) {
+                resultContainer.innerHTML = `<span class="error"><strong>Error calling API:</strong> ${error.message}</span>`;
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        // --- Main Event Listener for "Show Analysis" Button ---
+        document.getElementById('show-button').addEventListener('click', function() {
+            // Show the hidden output section
+            var outputSection = document.getElementById('output-section');
+            outputSection.style.display = 'block';
+
+            // Hide the button container
+            document.getElementById('button-container').style.display = 'none';
+
+            // --- Generate Sample Data for Plotly ---
+            // (This is the same as before, simulating Python output)
+            
+            function generateClusterData(count, xCenter, yCenter, xStdDev, yStdDev) {
+                let x = [];
+                let y = [];
+                for (let i = 0; i < count; i++) {
+                    let u = Math.random();
+                    let v = Math.random();
+                    let rand_std_normal = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+                    x.push(rand_std_normal * xStdDev + xCenter);
+                    
+                    u = Math.random();
+                    v = Math.random();
+                    rand_std_normal = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+                    y.push(rand_std_normal * yStdDev + yCenter);
+                }
+                return {x, y};
+            }
+
+            const cluster0Data = generateClusterData(647, -3, 3, 1.5, 1);
+            const cluster1Data = generateClusterData(531, 4, 4, 1.2, 1.2);
+            const cluster2Data = generateClusterData(450, -2, -3, 1.2, 1.5);
+            const cluster3Data = generateClusterData(612, 5, -2, 1.3, 1.3);
+
+            const trace0 = { x: cluster0Data.x, y: cluster0Data.y, mode: 'markers', type: 'scatter', name: 'Cluster 0 (Low Income, Kids)', marker: { size: 5, opacity: 0.6 } };
+            const trace1 = { x: cluster1Data.x, y: cluster1Data.y, mode: 'markers', type: 'scatter', name: 'Cluster 1 (High Income, Wine)', marker: { size: 5, opacity: 0.6 } };
+            const trace2 = { x: cluster2Data.x, y: cluster2Data.y, mode: 'markers', type: 'scatter', name: 'Cluster 2 (Mid Income, Teens)', marker: { size: 5, opacity: 0.6 } };
+            const trace3 = { x: cluster3Data.x, y: cluster3Data.y, mode: 'markers', type: 'scatter', name: 'Cluster 3 (Mid Income, General)', marker: { size: 5, opacity: 0.6 } };
+
+            const data = [trace0, trace1, trace2, trace3];
+            const layout = { title: 'Customer Segments (Simulated PCA Plot)', xaxis: { title: 'Principal Component 1 (PCA1)', zeroline: false }, yaxis: { title: 'Principal Component 2 (PCA2)', zeroline: false }, hovermode: 'closest', margin: { t: 50, b: 50, l: 50, r: 20 }, legend: { orientation: 'h', yanchor: 'bottom', y: 1.02, xanchor: 'right', x: 1 } };
+            const config = {responsive: true};
+
+            Plotly.newPlot('pca-plot', data, layout, config);
+
+            // --- Setup LLM analysis handlers ---
+            const apiResultContainer = document.getElementById('api-result');
+            const apiLoader = document.getElementById('api-loader');
+
+            // Hardcoded data from the sample output to send to the API
+            const clusterApiData = [
+                { id: "Cluster 0", avg_income: 35421.02, kid_home: 0.88, teen_home: 0.47, avg_wine_spend: 30.84, recency: 48.10 },
+                { id: "Cluster 1", avg_income: 70903.88, kid_home: 0.08, teen_home: 0.24, avg_wine_spend: 520.28, recency: 49.61 },
+                { id: "Cluster 2", avg_income: 60533.19, kid_home: 0.22, teen_home: 0.80, avg_wine_spend: 412.16, recency: 50.31 },
+                { id: "Cluster 3", avg_income: 45749.03, kid_home: 0.54, teen_home: 0.39, avg_wine_spend: 185.08, recency: 49.17 }
+            ];
+
+            // Function to create a prompt
+            function createPrompt(clusterData) {
+                return `
+Analyze the following customer segment data:
+${JSON.stringify(clusterData, null, 2)}
+
+Based on this data, please provide:
+1.  **Marketing Persona:** A creative name and a one-paragraph description for this customer segment.
+2.  **Actionable Strategies:** Three bullet-point marketing strategies to effectively target this group.
+`;
+            }
+
+            // Add listeners to all 4 buttons (guard elements exist)
+            for (let i = 0; i < 4; i++) {
+                const btn = document.getElementById(`analyze-cluster-${i}`);
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        const prompt = createPrompt(clusterApiData[i]);
+                        callGeminiAPI(prompt, apiResultContainer, apiLoader);
+                    });
+                }
+            }
+
+        });
+    </script>
+
+</body>
+</html>
